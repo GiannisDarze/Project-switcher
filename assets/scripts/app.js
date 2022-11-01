@@ -85,6 +85,7 @@ class ProjectItem {
     this.updateProjectListsHandler = updateProjectListsFunction;
     this.moreInfoButton();
     this.switchButton(type);
+    this.dragging();
   }
 
   showMoreInfoHandler() {
@@ -103,6 +104,15 @@ class ProjectItem {
     );
     infoWindow.attach();
     this.hasActiveInfoBox = true;
+  }
+
+  dragging() {
+    const item = document.getElementById(this.id);
+    item.addEventListener("dragstart", (event) => {
+      event.dataTransfer.setData("text/plain", this.id);
+      event.dataTransfer.effectAllowed = "move";
+    });
+    item.addEventListener("dragend", (event) => {});
   }
 
   moreInfoButton() {
@@ -143,6 +153,43 @@ class Lists {
       );
     }
     console.log(this.projects);
+    this.droppingArea();
+  }
+
+  droppingArea() {
+    const list = document.querySelector(`#${this.type}-projects ul`);
+
+    list.addEventListener("dragenter", (event) => {
+      if (event.dataTransfer.types[0] === "text/plain") {
+        event.preventDefault();
+      }
+      list.parentElement.classList.add("droppable");
+    });
+
+    list.addEventListener("dragover", (event) => {
+      if (event.dataTransfer.types[0] === "text/plain") {
+        event.preventDefault();
+      }
+    });
+
+    list.addEventListener("dragleave", (event) => {
+      if (event.relatedTarget.closest(`#${this.type}-projects ul`) !== list) {
+        list.parentElement.classList.remove("droppable");
+      }
+    });
+
+    list.addEventListener("drop", (event) => {
+      const projectId = event.dataTransfer.getData("text/plain");
+      if (this.projects.find((p) => p.id === projectId)) {
+        return;
+      }
+      document
+        .getElementById(projectId)
+        .querySelector("button:last-of-type")
+        .click();
+      list.parentElement.classList.remove("droppable");
+      event.preventDefault();
+    });
   }
 
   setSwitchHandlerFunction(switchHandlerFunction) {
