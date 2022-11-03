@@ -36,6 +36,7 @@ class GrandMaster {
     );
   }
 }
+
 class InfoWindow extends GrandMaster {
   constructor(closeNotifier, text, hostElementId) {
     super(hostElementId);
